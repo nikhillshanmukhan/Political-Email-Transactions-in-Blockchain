@@ -1,0 +1,429 @@
+
+"""
+Python Programming (ACFI827)
+Assignment 1: Simulate Political Email Transactions in Blockchain
+Created on Sat Nov 26 04:12:33 2022
+
+"""
+#importing the modules and library
+
+import datetime  #to find the system current time
+import hashlib as _hashlib   #to find the hash value
+import random   #to run the random function
+import math as m  #importing math to find power of a number
+
+
+# Importing the political-emails.json file in Python 
+
+import json as _json
+jsonFilePath =r'C:\Users\Nikhill\Desktop\uni\assignment\python\political-emails.json'
+ #This is path of file in my computer were i have saved the file political-emails.json
+
+with open(jsonFilePath) as json_file:
+    json_data = _json.load(json_file)
+
+      
+
+
+# =============================================================================
+#Task A Total number of emails and compare dictionary keys
+# =============================================================================
+'''
+The len function return the length (number of political emails) of the json_date  which is a list of dictionary,the value is stored in 
+the variable num.
+
+The for loop check whether the keys of the dictinary are identical,it check the keys of the consicutive dictionary in the list,and 
+increment the value of the variable count,if the keys are not identical. 
+
+'''
+
+num=len(json_data)
+print("the number of political email =",num,"\n")
+
+
+count=0
+for i in range (0,len(json_data)-1):
+    if list(json_data[i].keys()) != list(json_data[i+1].keys()):
+        count=count+1
+print("count :",count,"\n")
+if count == 0:
+    print("the keys of the dictionary are identical \n")   
+else:
+    print("the keys of the dictionary are non identical \n")
+    
+'''
+OUTPUT
+-----------------------------------
+
+the number of political email = 406 
+
+count : 0 
+
+the keys of the dictionary are identical 
+
+'''
+    
+#==============================================================================================
+#Task B Compare the hash value 
+#==============================================================================================   
+"""
+Two functions hashing and comp are defined to return the hashvalue and make comparison of the hash value respectively.
+It check whether the two hash values are identical or not.
+"""
+
+
+def hashing(n,em):
+    
+    import hashlib as _hashlib  
+    encoded_block = str(json_data[n]).encode()
+    hash_value =str( _hashlib.sha256(encoded_block).hexdigest())
+    print(em,"is",hash_value,"\n")
+    return hash_value
+
+def comp(n,p,em):
+    if n==p:
+        print(em,"are identical \n")
+    else:
+        print(em,"are non identical \n")
+    
+    
+hashvalue1=hashing(8,"hashvalue1")
+hashvalue2=hashing(8,"hashvalue2")
+hashvalue3=hashing(10,"hashvalue3")
+
+
+comp(hashvalue1,hashvalue2,"hashvalue1 and hashvalue2")
+comp(hashvalue2,hashvalue3,"hashvalue2 and hashvalue3")
+
+"""
+OUTPUT
+---------------
+
+hashvalue1 is a2981b38880b19db5eaaa6dd70a80f5fb85cffcb4e2e72171d2dff6f57dfa7b2 
+
+hashvalue2 is a2981b38880b19db5eaaa6dd70a80f5fb85cffcb4e2e72171d2dff6f57dfa7b2 
+
+hashvalue3 is f48a77fb8a999126bb84054a70f2fdb9bfaa474ce1fd5267fab74dbed22c643c 
+
+hashvalue1 and hashvalue2 are identical 
+
+hashvalue2 and hashvalue3 are non identical 
+
+"""
+
+#==============================================================================================
+#Task C1 Write Python function to create dictionary of a block.
+#==============================================================================================
+
+#Task C1.1
+"""
+create_block fuction create and returns a block with the argument that is passed to the function
+
+"""
+
+def create_block(bi,ts,td,pw,ph):
+    block={'block_index':bi,'transaction_timestamp':ts ,'transaction_data':td ,'proof_of_work':pw ,'previous_hash':ph}
+    return block
+
+
+#Task C1.2
+"""
+create_chain fuction append the block which is of dictionary dataype to the list chainseries.
+
+"""
+chainseries=[]   #an empty list is assigned to  the variable chainseries
+def create_chain(bl):
+    chainseries.append(bl)   #the block bl is appended to the list chainseries
+
+    
+    
+#==============================================================================================
+#Task C2 Create a genesis block (first block in the chain)
+#==============================================================================================
+"""
+The genesis block is created using the create_block function and the block is append to the list chainseries using the function create_chain().
+
+"""
+dt=str(datetime.datetime.now())
+
+encoded_block = str(000).encode()
+hvalue = _hashlib.sha256(encoded_block).hexdigest()
+
+genesis_block=create_block(1,dt, 'This is the genesis block of email transactions.',1,hvalue)
+create_chain(genesis_block)
+#print(chainseries)
+
+"""
+OUTPUT
+--------------------------------
+
+[{'block_index': 1, 'transaction_timestamp': '2022-12-09 02:17:49.636018',
+  'transaction_data': 'This is the genesis block of email transactions.', 'proof_of_work': 1,
+  'previous_hash': '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9'}]
+
+"""
+
+
+#==============================================================================================
+#Task C3 Blockchain Mining - the process of adding transaction records to the chain.
+#==============================================================================================
+
+
+#Task C 3.1  Proof of work by imputation of random number
+#==============================================================================================
+
+"""
+Using the random module in the python, a random number is generated between 2000 and 7000 which is used as the proof of work
+The function mine_block is defined in order to generate the corresponding valuesas block index,timestamp,
+transaction data,previous hash and proof of work for the creation of a block,and the value is returned
+"""
+
+"""
+
+def mine_block(n):
+    bi=len(chainseries)+1
+    tt=str(datetime.datetime.now())
+    td=json_data[n]['datetime']+ ", " +json_data[n]['email_id']
+    encoded_block = str(chainseries[len(chainseries)-1]).encode()
+    hv = _hashlib.sha256(encoded_block).hexdigest()
+    pw=random.randint(2000,7000)    #randomly select an integer value between 2000 and 7000 
+    return bi,tt,td,pw,hv
+
+bi,tt,td,pw,hv= mine_block(10)
+
+block=create_block(bi, tt, td, pw, hv)
+#print(block)
+create_chain(block)
+print(chainseries)
+
+"""
+
+"""
+OUTPUT
+-----------------------------
+[{'block_index': 1, 'transaction_timestamp': '2022-12-09 04:00:22.626172',
+  'transaction_data': 'This is the genesis block of email transactions.',
+  'proof_of_work': 1, 'previous_hash': '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9'},
+ {'block_index': 2, 'transaction_timestamp': '2022-12-09 04:00:22.626172',
+  'transaction_data': '07/12/2016 07:18, 306', 'proof_of_work': 6283, 
+  'previous_hash': 'feb41d7e5e58b394cf539ee523c6cca47e4755616bb6cbf1dd197311b7b1a9fa'}]
+
+"""
+
+
+#Task C 3.2 Proof of work algorithm
+#==============================================================================================
+
+"""
+the proof of work algorithm is used to find the proof of work for the block.The function proof_of_work_algo() is called in 
+the function mine_block().The loop runs till the value of the variable check_proof becomes True.The function return the value
+of proof of work. Here the mine_block is modified with two more arguments such as previous proof of work and current block number
+,it is used to pass argument to the proof_of_work_algo() function.
+
+
+"""
+
+
+def proof_of_work_algo(i,pj,di):    # i =current block, di=transaction data, pj= previous proof of work of a i-1th block
+
+    check_proof=False
+    pi=1
+    while check_proof != True :        # check if the value of check_proof not equal to True,exit the loop if the value is True
+        xi=m.pow(pi,3)+m.pow(pj,2)+i
+        Xi=str(xi)
+        yi=Xi+di
+        Yi=str(yi).encode()
+        hv=str(_hashlib.sha256(Yi).hexdigest())
+        if hv[0:3]=="000":    # check if the first three character of the hash value is "000",if yes check_proof gets value True
+            check_proof=True
+        else:
+            pi=pi+1
+    return pi
+
+
+def mine_block(n,pj,blocknum):
+    bi=len(chainseries)+1
+    tt=str(datetime.datetime.now())
+    td=json_data[n]['datetime']+ ", " +json_data[n]['email_id']
+    encoded_block = str(chainseries[len(chainseries)-1]).encode()
+    hv = _hashlib.sha256(encoded_block).hexdigest()
+    pw = proof_of_work_algo(blocknum,pj,td)
+    return bi,tt,td,pw,hv
+
+
+
+#prework= chainseries[len(chainseries)-1]['proof_of_work']
+#block_number=len(chainseries)
+#bi,tt,td,pw,hv= mine_block(10,prework,block_number)
+#block=create_block(bi, tt, td, pw, hv)
+#create_chain(block)
+#print(chainseries)
+
+'''
+OUTPUT
+-----------------------------
+
+[{'block_index': 1, 'transaction_timestamp': '2022-12-09 05:26:03.459571',
+ 'transaction_data': 'This is the genesis block of email transactions.', 
+ 'proof_of_work': 1, 'previous_hash': '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9'},
+ {'block_index': 2, 'transaction_timestamp': '2022-12-09 05:26:03.459571',
+  'transaction_data': '07/12/2016 07:18, 306', 'proof_of_work': 2362, 
+  'previous_hash': 'f884a03379b9e5df09eec3994c71cf78bd5fba0fad169fe9f1a808f37a47b56e'}]
+
+
+'''
+
+#==============================================================================================
+# Task C4: Simulate the storage of political email transaction in the blockchain
+#==============================================================================================
+
+"""
+The for loop runs 120 times.the variable prework gives the previous proof of work,block number gives the current number of the block.
+Using the randrange function,a random number is selected between 0 to length of the jason_data(406) this gives the index of each dictionary(email data) 
+in the jason_data,thus each data from random selected email from the jason_data can be used.The mine_block function return the values for create_block() function.
+and the newely created block is appended to the chainseries list.
+"""
+
+from random import randrange  
+num=len(json_data)
+count=0
+for i in range(1,121):
+    prework= chainseries[len(chainseries)-1]['proof_of_work']
+    block_number=len(chainseries)
+    bi,tt,td,pw,hv= mine_block(randrange(num),prework,block_number)
+    block=create_block(bi, tt, td, pw, hv)
+    create_chain(block)
+       
+
+print(chainseries) 
+
+
+"""
+OUTPUT
+---------------------------
+
+[{'block_index': 1, 'transaction_timestamp': '2022-12-09 06:07:51.737838', 'transaction_data': 'This is the genesis block of email transactions.', 'proof_of_work': 1, 'previous_hash': '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9'}
+{'block_index': 2, 'transaction_timestamp': '2022-12-09 06:07:51.737838', 'transaction_data': '11/12/2020 07:05, 197', 'proof_of_work': 609, 'previous_hash': '87142d7fe8fbff523aec42d2841228ee97727bc30c2322573074449e3f3ac4cf'}
+{'block_index': 3, 'transaction_timestamp': '2022-12-09 06:07:51.739837', 'transaction_data': '02/07/2020 11:18, 178', 'proof_of_work': 4501, 'previous_hash': 'c8c6b37f3f365bce418ec61a780122b5488d65471ac56d342b3229b56a483d3e'}
+{'block_index': 4, 'transaction_timestamp': '2022-12-09 06:07:51.750872', 'transaction_data': '08/12/2017 14:03, 402', 'proof_of_work': 8004, 'previous_hash': '740d7be87a83565d6e294e3a172f284be71eec7fe658a79650b6d553d2385bb8'}
+{'block_index': 5, 'transaction_timestamp': '2022-12-09 06:07:51.768872', 'transaction_data': '15/01/2020 18:06, 129', 'proof_of_work': 622, 'previous_hash': '2206272c243f72e4297216d98b60a7c4e3cf1ae3e6c6208319b080258ca98a02'}
+{'block_index': 6, 'transaction_timestamp': '2022-12-09 06:07:51.769873', 'transaction_data': '24/07/2019 15:35, 81', 'proof_of_work': 10968, 'previous_hash': 'bb895a57599af243ae1e4f5580ec2f6e890fba2e10cb95df3b4a202e3dd5ee74'}
+{'block_index': 7, 'transaction_timestamp': '2022-12-09 06:07:51.793872', 'transaction_data': '25/12/2018 08:30, 262', 'proof_of_work': 2393, 'previous_hash': 'c8092f839a109849b8bbe60b6341d404c8be4e2d60465cf5580783dbe7d51a39'}
+{'block_index': 8, 'transaction_timestamp': '2022-12-09 06:07:51.798872', 'transaction_data': '15/01/2020 12:04, 321', 'proof_of_work': 933, 'previous_hash': '2f29d5b0d7665cb5186700343b7bcc48c5784e65961eb5c6092a68826acf881e'}
+{'block_index': 9, 'transaction_timestamp': '2022-12-09 06:07:51.799873', 'transaction_data': '29/11/2019 13:05, 118', 'proof_of_work': 1292, 'previous_hash': '0df3aa4d959ec13c1a3b36edf96645569be409522bc186be027be04c338d1f69'}
+{'block_index': 10, 'transaction_timestamp': '2022-12-09 06:07:51.802877', 'transaction_data': '25/01/2020 14:00, 131', 'proof_of_work': 19220, 'previous_hash': 'b41eec18cd91071e30d468341e76ff112f01f9b401454a11c083c0c138635f0e'}
+{'block_index': 11, 'transaction_timestamp': '2022-12-09 06:07:51.840871', 'transaction_data': '12/10/2018 17:04, 46', 'proof_of_work': 3295, 'previous_hash': '011b3e52b2c558ae4cdf9f993439abf4eefaa0e8af8c183251e1c6de3d44ea4d'}
+{'block_index': 12, 'transaction_timestamp': '2022-12-09 06:07:51.847877', 'transaction_data': '11/06/2020 12:18, 349', 'proof_of_work': 1673, 'previous_hash': '5cec4ae37f4b07c788cb1f04fa8cdc829b0a9294d7b7d2b17f7086e5b45cdcb8'}
+{'block_index': 13, 'transaction_timestamp': '2022-12-09 06:07:51.850871', 'transaction_data': '15/11/2017 17:38, 400', 'proof_of_work': 8945, 'previous_hash': '7edfd5d6f982980bf873e8db41d15ecddd137370d17393e38014177fe6703f6d'}
+{'block_index': 14, 'transaction_timestamp': '2022-12-09 06:07:51.868871', 'transaction_data': '09/12/2016 07:00, 305', 'proof_of_work': 3473, 'previous_hash': '4ee25f491879c4eb35f1eba4fc8c068a64d729fc4c35c2366397b0ad23305102'}
+{'block_index': 15, 'transaction_timestamp': '2022-12-09 06:07:51.875872', 'transaction_data': '09/04/2020 16:45, 147', 'proof_of_work': 3595, 'previous_hash': 'a027ae2f18775669a4eecf3bae0d6d47e2b757b826d4dfbc6c370cb0c0feb9e5'}
+{'block_index': 16, 'transaction_timestamp': '2022-12-09 06:07:51.882871', 'transaction_data': '11/02/2020 17:36, 132', 'proof_of_work': 25367, 'previous_hash': '331622878366b1a459fbd223f9e856d12a43f91d5018eb7c6f09d8515b4f0f01'}
+{'block_index': 17, 'transaction_timestamp': '2022-12-09 06:07:51.933865', 'transaction_data': '18/06/2018 15:25, 24', 'proof_of_work': 7509, 'previous_hash': '6d571c13f4ce432c9a5beb895c0db06633053168e45b784f39cf0bf7640d5dbd'}
+{'block_index': 18, 'transaction_timestamp': '2022-12-09 06:07:51.948865', 'transaction_data': '03/12/2019 09:03, 313', 'proof_of_work': 2586, 'previous_hash': '7d64d8af2fd48c4511e729a2da18145a181f99d9b6fc0e3f0832d362b9b0525a'}
+{'block_index': 19, 'transaction_timestamp': '2022-12-09 06:07:51.954865', 'transaction_data': '25/11/2019 10:46, 310', 'proof_of_work': 2359, 'previous_hash': '36bc8b78d6b11663828d1a6331121288a2b8af00370a96d5ea3b5b8a7a6a4cd1'}
+{'block_index': 20, 'transaction_timestamp': '2022-12-09 06:07:51.958865', 'transaction_data': '02/01/2020 11:03, 125', 'proof_of_work': 774, 'previous_hash': 'ffa13f333c2a612a2917da5fc284b2d1e7228b586bab3f04ade9ed791ab8fe30'}
+{'block_index': 21, 'transaction_timestamp': '2022-12-09 06:07:51.960865', 'transaction_data': '16/06/2020 10:19, 352', 'proof_of_work': 547, 'previous_hash': '761a1b5f7f2d125ac068d48716ad7a21eaa9da349577467a9fea2b9726fee186'}
+{'block_index': 22, 'transaction_timestamp': '2022-12-09 06:07:51.961865', 'transaction_data': '25/08/2020 09:10, 194', 'proof_of_work': 2388, 'previous_hash': 'daf624d175ef539dfdef644015b9f044c551b24502c2b826895a579f909f6221'}
+{'block_index': 23, 'transaction_timestamp': '2022-12-09 06:07:51.966865', 'transaction_data': '15/12/2017 07:28, 404', 'proof_of_work': 1109, 'previous_hash': '91e11aa22aac9ec39035c3c45c7a4a64785c1f50fbe817885e6dd44c0176b569'}
+{'block_index': 24, 'transaction_timestamp': '2022-12-09 06:07:51.974871', 'transaction_data': '04/07/2020 06:46, 180', 'proof_of_work': 2444, 'previous_hash': 'b244e9cf38541087a9414894b212489c8974c2ecdadda9202279270c40ad3911'}
+{'block_index': 25, 'transaction_timestamp': '2022-12-09 06:07:51.979873', 'transaction_data': '31/12/2019 18:52, 123', 'proof_of_work': 1536, 'previous_hash': '40ac22ca00ff45992408fdeac763b53c33337c9d3e3ee0c816736c786cddd5a4'}
+{'block_index': 26, 'transaction_timestamp': '2022-12-09 06:07:51.982871', 'transaction_data': '16/09/2018 08:03, 248', 'proof_of_work': 3746, 'previous_hash': '3db58392516e628dfc83216f94e1f1ee6c1f39ee56536dd5dde4ffaa45617d92'}
+{'block_index': 27, 'transaction_timestamp': '2022-12-09 06:07:51.990865', 'transaction_data': '02/09/2020 07:04, 196', 'proof_of_work': 1842, 'previous_hash': '317e6ee52610af9a3ddc26ccf8a2f929bb6aaa69ff019cc2beabd1d5084873d5'}
+{'block_index': 28, 'transaction_timestamp': '2022-12-09 06:07:51.994864', 'transaction_data': '29/09/2017 10:46, 4', 'proof_of_work': 6030, 'previous_hash': '2fd5d21906c48589e6cb4643b4463d097bdabaabfa081c53fb5b5ecca239a112'}
+{'block_index': 29, 'transaction_timestamp': '2022-12-09 06:07:52.007873', 'transaction_data': '25/02/2020 19:21, 326', 'proof_of_work': 558, 'previous_hash': 'cd355b3d30ffca02c758828ed71a43e0bf85d5efc088981591ffad965977bc6f'}
+{'block_index': 30, 'transaction_timestamp': '2022-12-09 06:07:52.008872', 'transaction_data': '13/07/2018 08:38, 238', 'proof_of_work': 1408, 'previous_hash': '7786c3450fd6d2c47bc2b59c5d4c85d91a0ea1670c2702fa4b0a0622023d854e'}
+{'block_index': 31, 'transaction_timestamp': '2022-12-09 06:07:52.011865', 'transaction_data': '11/03/2020 14:29, 139', 'proof_of_work': 8469, 'previous_hash': 'cc25efe6a5b6862f06c6835d2ae3ea3ae59398692a2b64e5734c26db4ffad805'}
+{'block_index': 32, 'transaction_timestamp': '2022-12-09 06:07:52.028869', 'transaction_data': '11/09/2020 15:25, 377', 'proof_of_work': 1735, 'previous_hash': '87a6cefd9d1466df4cf48b8e906cf96fd3d9538891e78cf5babe31f6a767e136'}
+{'block_index': 33, 'transaction_timestamp': '2022-12-09 06:07:52.032837', 'transaction_data': '05/06/2020 15:02, 168', 'proof_of_work': 856, 'previous_hash': '3628091a3895c54d2e8e395b5012c4df00e7d80946d21a1e1b7672bce5ea6119'}
+{'block_index': 34, 'transaction_timestamp': '2022-12-09 06:07:52.034837', 'transaction_data': '11/11/2019 14:12, 300', 'proof_of_work': 7064, 'previous_hash': 'd71f2617ecfcac3c7d36cf5bdf2eaf1c0b475a79fcc3d7ac55bb01fa0bed6086'}
+{'block_index': 35, 'transaction_timestamp': '2022-12-09 06:07:52.049872', 'transaction_data': '18/07/2020 12:46, 360', 'proof_of_work': 5361, 'previous_hash': '5d71c45afd855eecb0e55c31f96daa72cbdb9067b0d7130164710642b21bbbf9'}
+{'block_index': 36, 'transaction_timestamp': '2022-12-09 06:07:52.061879', 'transaction_data': '17/10/2017 05:20, 207', 'proof_of_work': 10066, 'previous_hash': '71acac9bb97e40f4f3483fb1a0f21504117c98d1b7e10603841c408463545909'}
+{'block_index': 37, 'transaction_timestamp': '2022-12-09 06:07:52.082873', 'transaction_data': '06/05/2020 08:08, 159', 'proof_of_work': 5366, 'previous_hash': '6a9d5534f19bc98bc0de3f1896a4e6a459f77a7c1aae2f1b447a0ca9c277fe23'}
+{'block_index': 38, 'transaction_timestamp': '2022-12-09 06:07:52.093852', 'transaction_data': '15/12/2019 17:36, 121', 'proof_of_work': 9142, 'previous_hash': '0762d44ef63275b4d1f2dedaacf79205977d87a67202d6d03bc8ddd1e5784aee'}
+{'block_index': 39, 'transaction_timestamp': '2022-12-09 06:07:52.113878', 'transaction_data': '16/06/2020 12:37, 172', 'proof_of_work': 4018, 'previous_hash': '833a4b19eac9a0e3ab1cfe624ac781beec02b3e557adcbe40f3185f307ecba2e'}
+{'block_index': 40, 'transaction_timestamp': '2022-12-09 06:07:52.121878', 'transaction_data': '07/09/2019 03:31, 95', 'proof_of_work': 2665, 'previous_hash': '59f16c928612da2e0734c7b8a8d1b44ae69d64b07fde15452b6759ff04617366'}
+{'block_index': 41, 'transaction_timestamp': '2022-12-09 06:07:52.128871', 'transaction_data': '28/08/2019 16:26, 89', 'proof_of_work': 2585, 'previous_hash': '06031e4362f405b26c05cfae29f9894c1d16282d883202e75df23eb44f3f812a'}
+{'block_index': 42, 'transaction_timestamp': '2022-12-09 06:07:52.133878', 'transaction_data': '26/02/2018 18:32, 216', 'proof_of_work': 11129, 'previous_hash': 'ed139834b99fc407387aa35ac588f9adea0b09e1790b9558e2225aadce545dd4'}
+{'block_index': 43, 'transaction_timestamp': '2022-12-09 06:07:52.158871', 'transaction_data': '03/11/2017 08:58, 6', 'proof_of_work': 3560, 'previous_hash': '9c84e616ffb81b1bc01be5075b878fc4c44a82d12b05660db8a0764f510d1c7a'}
+{'block_index': 44, 'transaction_timestamp': '2022-12-09 06:07:52.167837', 'transaction_data': '17/03/2017 08:50, 112', 'proof_of_work': 66, 'previous_hash': '6a8fadbf9f3af82f9e77dd264bb493dccf5f7cd30d129f6b2ebfa08e6a652ce9'}
+{'block_index': 45, 'transaction_timestamp': '2022-12-09 06:07:52.167837', 'transaction_data': '26/09/2019 10:04, 97', 'proof_of_work': 980, 'previous_hash': 'e15f9addcfc1764aa1d612f9c6e295aeebae0f9e9e6b3e1e48f400ec50c3cb88'}
+{'block_index': 46, 'transaction_timestamp': '2022-12-09 06:07:52.170837', 'transaction_data': '13/04/2018 08:07, 18', 'proof_of_work': 5015, 'previous_hash': 'ec75622dcd66d085b8c08e408de5e68df0f662f45aa151fd0703c258600933ca'}
+{'block_index': 47, 'transaction_timestamp': '2022-12-09 06:07:52.180838', 'transaction_data': '14/07/2020 16:00, 357', 'proof_of_work': 1072, 'previous_hash': 'c3fad026d93b304e888cefedb35bfdca269b61a054059ff50afb5841f9e56884'}
+{'block_index': 48, 'transaction_timestamp': '2022-12-09 06:07:52.182837', 'transaction_data': '26/06/2018 08:23, 232', 'proof_of_work': 7429, 'previous_hash': 'b2390d37ccc2e60aee691ae089d6d0f584d6a4419a7a9cbc3b33831a6ee6fc6a'}
+{'block_index': 49, 'transaction_timestamp': '2022-12-09 06:07:52.198837', 'transaction_data': '09/06/2020 06:39, 169', 'proof_of_work': 1302, 'previous_hash': '3ac998a3e94f8f6cb15b86c60abe2b63388c0bedbe73f0dc4edbb31fd52c7860'}
+{'block_index': 50, 'transaction_timestamp': '2022-12-09 06:07:52.201837', 'transaction_data': '30/05/2019 11:44, 269', 'proof_of_work': 256, 'previous_hash': '30971b0c594f7bda85b84bcb7c62a282728c352ea82893c2f5035c53fbfd37d5'}
+{'block_index': 51, 'transaction_timestamp': '2022-12-09 06:07:52.201837', 'transaction_data': '30/03/2020 14:17, 331', 'proof_of_work': 447, 'previous_hash': '5532a038f633260a84079a74a1f59fc242d57680f63b57ea5aa49f92917e1914'}
+{'block_index': 52, 'transaction_timestamp': '2022-12-09 06:07:52.202837', 'transaction_data': '31/05/2018 14:47, 225', 'proof_of_work': 1720, 'previous_hash': '6e0abacfdd544d086f7f93018c0ed8917936a510277a2b01158c98425f8e5752'}
+{'block_index': 53, 'transaction_timestamp': '2022-12-09 06:07:52.206837', 'transaction_data': '03/12/2019 09:03, 313', 'proof_of_work': 4455, 'previous_hash': '3099ed271b9ec5158fd8c162e97a106899a5bc48f38032951cb675f06bdf9ab8'}
+{'block_index': 54, 'transaction_timestamp': '2022-12-09 06:07:52.216871', 'transaction_data': '02/01/2020 11:03, 125', 'proof_of_work': 2989, 'previous_hash': 'aef7c3021614e09978ef338774badf88101711addcb32d9f0d937f11733f2a4a'}
+{'block_index': 55, 'transaction_timestamp': '2022-12-09 06:07:52.222871', 'transaction_data': '31/12/2017 13:57, 212', 'proof_of_work': 869, 'previous_hash': '7178814402e466759cae1cd0981a6f9b8de92bdb4b2d20b81bd7bf3daea9baf0'}
+{'block_index': 56, 'transaction_timestamp': '2022-12-09 06:07:52.224838', 'transaction_data': '11/11/2019 14:12, 300', 'proof_of_work': 2718, 'previous_hash': '8e64216fc8deea974a6432b67cbb3c55d23eea8d6d0bfce4a7fbb880cfb80e68'}
+{'block_index': 57, 'transaction_timestamp': '2022-12-09 06:07:52.230876', 'transaction_data': '10/04/2017 18:42, 282', 'proof_of_work': 4664, 'previous_hash': '93955b8a2466257c35263a49a97020652cfb805bfa13d339835d25843fffbed7'}
+{'block_index': 58, 'transaction_timestamp': '2022-12-09 06:07:52.240871', 'transaction_data': '06/07/2020 15:38, 355', 'proof_of_work': 1533, 'previous_hash': '2b5199b77f36a2f471963cf67baf810ffa9cae66e4a0aa4695372a4d55a395d1'}
+{'block_index': 59, 'transaction_timestamp': '2022-12-09 06:07:52.243871', 'transaction_data': '02/09/2020 07:04, 196', 'proof_of_work': 1859, 'previous_hash': '9c4995aaf10be3a071a8b01ca6a8f3c763222fad93e6f883b194c8d85584598c'}
+{'block_index': 60, 'transaction_timestamp': '2022-12-09 06:07:52.247876', 'transaction_data': '26/03/2018 09:59, 219', 'proof_of_work': 3720, 'previous_hash': '12e850caf5eef0f0315edecc49f4dce3c5695c71d244acf31d3e2d315e1228e9'}
+{'block_index': 61, 'transaction_timestamp': '2022-12-09 06:07:52.255872', 'transaction_data': '26/06/2018 08:23, 232', 'proof_of_work': 1823, 'previous_hash': 'a2fa44e284115541a43648ed585fc22d34fda908d7ede9d873af3f921699b285'}
+{'block_index': 62, 'transaction_timestamp': '2022-12-09 06:07:52.259872', 'transaction_data': '24/07/2019 15:35, 81', 'proof_of_work': 4672, 'previous_hash': 'dcfbe6a58ed2da26688731cf97d5a5294fe3f97a92e428346115a11ec558220c'}
+{'block_index': 63, 'transaction_timestamp': '2022-12-09 06:07:52.269871', 'transaction_data': '24/05/2020 10:40, 346', 'proof_of_work': 6257, 'previous_hash': 'eeb68b7cacbe265464d1116c2efa322651b1d19abacb4e725b25bfa87d357c99'}
+{'block_index': 64, 'transaction_timestamp': '2022-12-09 06:07:52.283875', 'transaction_data': '18/07/2017 14:14, 202', 'proof_of_work': 3905, 'previous_hash': '9ed37d3241162f524a551d8209114256155b0382036700b7ad34f7bc85399ac2'}
+{'block_index': 65, 'transaction_timestamp': '2022-12-09 06:07:52.291871', 'transaction_data': '18/09/2019 07:52, 291', 'proof_of_work': 3017, 'previous_hash': '1b40ea2fde3fcecb1a60128985cef3bae5bca2535363140a70346c78beae3d3f'}
+{'block_index': 66, 'transaction_timestamp': '2022-12-09 06:07:52.298880', 'transaction_data': '26/06/2019 13:42, 278', 'proof_of_work': 3006, 'previous_hash': '59330127bbef82d28492ef659e6247fcab0c855cdb87cf25aa70c49d880d495c'}
+{'block_index': 67, 'transaction_timestamp': '2022-12-09 06:07:52.304876', 'transaction_data': '21/12/2017 10:01, 211', 'proof_of_work': 6632, 'previous_hash': '54fbda0f693b7515ba8d8aaecb8b861e20438f621c83469d1e99039d3bc641dd'}
+{'block_index': 68, 'transaction_timestamp': '2022-12-09 06:07:52.318871', 'transaction_data': '28/06/2019 06:43, 73', 'proof_of_work': 8965, 'previous_hash': '9fb18e3eedc0b7be9009d2ba609b0550163eafd43334689aaadd137197325cc5'}
+{'block_index': 69, 'transaction_timestamp': '2022-12-09 06:07:52.337839', 'transaction_data': '14/04/2020 16:09, 148', 'proof_of_work': 2593, 'previous_hash': '4ce05598688d4ce48482dc229049e103714113341921dbe4c9d3b50749d22c20'}
+{'block_index': 70, 'transaction_timestamp': '2022-12-09 06:07:52.343873', 'transaction_data': '01/11/2018 09:45, 259', 'proof_of_work': 945, 'previous_hash': '97a7e228a860fadb0c86334d0987f85029d1d470773dd67f2c607118a7cc2243'}
+{'block_index': 71, 'transaction_timestamp': '2022-12-09 06:07:52.345839', 'transaction_data': '27/12/2019 14:04, 122', 'proof_of_work': 3438, 'previous_hash': 'a0cbb5db45f9c95de0df16e488f5e2bc6b2b15a28ec993fcca39047931fe2035'}
+{'block_index': 72, 'transaction_timestamp': '2022-12-09 06:07:52.352870', 'transaction_data': '11/11/2019 14:12, 300', 'proof_of_work': 269, 'previous_hash': 'cdb0361d6f11cd8bbac502fb8d6c5de48b9461e43cf901ad178a2df38be53f49'}
+{'block_index': 73, 'transaction_timestamp': '2022-12-09 06:07:52.353839', 'transaction_data': '26/09/2018 11:21, 42', 'proof_of_work': 1622, 'previous_hash': 'aa614f092ef0ae885883d4dbf8124dd95a2fed22f6d267eda996254c168cafce'}
+{'block_index': 74, 'transaction_timestamp': '2022-12-09 06:07:52.356881', 'transaction_data': '01/11/2018 09:45, 259', 'proof_of_work': 6850, 'previous_hash': '68942b6258d1aa35ec6318abb8b2208aa142dff15a27a5714577634ffb5463e3'}
+{'block_index': 75, 'transaction_timestamp': '2022-12-09 06:07:52.371878', 'transaction_data': '20/06/2019 15:15, 276', 'proof_of_work': 388, 'previous_hash': 'cd5aa623a45757f5d731d196b0bd32dc8f0e8f7d727217ab5c92396e4cd6aa60'}
+{'block_index': 76, 'transaction_timestamp': '2022-12-09 06:07:52.372874', 'transaction_data': '27/11/2019 18:29, 311', 'proof_of_work': 7409, 'previous_hash': 'ef52ad14460b79e67300203b545c1d1700661f2d7a4ae3f63e36c245eae47050'}
+{'block_index': 77, 'transaction_timestamp': '2022-12-09 06:07:52.388874', 'transaction_data': '14/12/2018 10:11, 263', 'proof_of_work': 1781, 'previous_hash': '9336978f4ffe7aa77974d442e4c0132d9d22a2fd6520ee0b0aef4758e474eb57'}
+{'block_index': 78, 'transaction_timestamp': '2022-12-09 06:07:52.392871', 'transaction_data': '31/05/2020 13:16, 347', 'proof_of_work': 1276, 'previous_hash': 'a46340ca91a6a631d89e02f47134672a9c4d14fb4d4df24369c105a1db77d14a'}
+{'block_index': 79, 'transaction_timestamp': '2022-12-09 06:07:52.394872', 'transaction_data': '05/05/2020 14:04, 341', 'proof_of_work': 893, 'previous_hash': '8640dae52080485c17b2b39d3535f75adfeaff6174e4aff40e5535e49aacca8a'}
+{'block_index': 80, 'transaction_timestamp': '2022-12-09 06:07:52.396871', 'transaction_data': '23/10/2018 17:52, 255', 'proof_of_work': 506, 'previous_hash': '139ba5a89986fa48548b1e1201198f5551b3ab0a4402104724629ee222cfd3db'}
+{'block_index': 81, 'transaction_timestamp': '2022-12-09 06:07:52.397870', 'transaction_data': '12/10/2018 17:04, 46', 'proof_of_work': 2373, 'previous_hash': '6f3a91e33756587f542f9d2c5754144310320b8c344ddd60864e8bca71a05db6'}
+{'block_index': 82, 'transaction_timestamp': '2022-12-09 06:07:52.402873', 'transaction_data': '24/08/2019 11:31, 288', 'proof_of_work': 2232, 'previous_hash': 'e410dd3e283dc0e729e9306eb43386e565e2e743b4fd4ac338e15f38e6ee577c'}
+{'block_index': 83, 'transaction_timestamp': '2022-12-09 06:07:52.407853', 'transaction_data': '17/12/2020 08:56, 252', 'proof_of_work': 448, 'previous_hash': 'b6725789ca8e3a745a34198fed1e565ea435a63f03f79b04066dbcf6ffd8246a'}
+{'block_index': 84, 'transaction_timestamp': '2022-12-09 06:07:52.408871', 'transaction_data': '11/10/2019 06:08, 296', 'proof_of_work': 1733, 'previous_hash': '969bea97ac1a1241227f210309a22a2eb6baad1248c29e69d71e08fce6918913'}
+{'block_index': 85, 'transaction_timestamp': '2022-12-09 06:07:52.412872', 'transaction_data': '30/05/2019 09:07, 65', 'proof_of_work': 1303, 'previous_hash': 'e9d0e7d7bd867840ef25261954aeec555b68bff33dea850654c3699030143e8e'}
+{'block_index': 86, 'transaction_timestamp': '2022-12-09 06:07:52.415841', 'transaction_data': '30/08/2018 11:11, 247', 'proof_of_work': 3409, 'previous_hash': '79cfe7b44f5ab837ee5d6cc3d2c428999cd8cf98723efd823c214e306c8aa20a'}
+{'block_index': 87, 'transaction_timestamp': '2022-12-09 06:07:52.422872', 'transaction_data': '29/10/2016 18:41, 187', 'proof_of_work': 4766, 'previous_hash': '983cd39fc0b652fd33d48656dc62e835c487b0db14db36e2ed613176a4d5420e'}
+{'block_index': 88, 'transaction_timestamp': '2022-12-09 06:07:52.432871', 'transaction_data': '20/05/2020 12:12, 164', 'proof_of_work': 608, 'previous_hash': '0e9928b7e689c0b9e2ab4e9244792c57c8eb08cfdc193985147a61a529940e24'}
+{'block_index': 89, 'transaction_timestamp': '2022-12-09 06:07:52.433877', 'transaction_data': '12/06/2019 08:29, 71', 'proof_of_work': 2021, 'previous_hash': 'e22a61ae26a945af7baae08a72b088fece720fa31ae10cfcfd30bf93fa011d51'}
+{'block_index': 90, 'transaction_timestamp': '2022-12-09 06:07:52.438871', 'transaction_data': '15/10/2020 07:57, 385', 'proof_of_work': 6363, 'previous_hash': 'fbb9411b2e8470ac4cb4e0d352b3e506dfd4f8e9e565dd447ea6b75a9e3a866d'}
+{'block_index': 91, 'transaction_timestamp': '2022-12-09 06:07:52.451871', 'transaction_data': '11/08/2019 10:12, 285', 'proof_of_work': 8585, 'previous_hash': '3e77516a2cb4c1ebd44322e6ff4e9af6f4baa2cf94ae0f608cb91835b1eb11a1'}
+{'block_index': 92, 'transaction_timestamp': '2022-12-09 06:07:52.470872', 'transaction_data': '07/01/2019 06:56, 57', 'proof_of_work': 2268, 'previous_hash': '1c5068c1a84d8a4660a85e0473df1c83892ee0a21423474ef577fb2e458e286f'}
+{'block_index': 93, 'transaction_timestamp': '2022-12-09 06:07:52.474871', 'transaction_data': '27/04/2020 11:15, 152', 'proof_of_work': 7002, 'previous_hash': 'b46fc7801c13f26debe0f3d98b23bfb8eaebe248e2d24a5c8190af3f29af1c34'}
+{'block_index': 94, 'transaction_timestamp': '2022-12-09 06:07:52.489873', 'transaction_data': '28/12/2018 08:15, 261', 'proof_of_work': 6920, 'previous_hash': 'b87427459d7494f8a55eeba3e3656ef9aeac41ba61751db2f45d73ac1898aa17'}
+{'block_index': 95, 'transaction_timestamp': '2022-12-09 06:07:52.504871', 'transaction_data': '14/05/2017 07:35, 67', 'proof_of_work': 4788, 'previous_hash': 'afc0310f63639f42e6e9428659d14cedbb9b3736b26753397fea39956a913683'}
+{'block_index': 96, 'transaction_timestamp': '2022-12-09 06:07:52.514881', 'transaction_data': '27/12/2019 14:04, 122', 'proof_of_work': 7374, 'previous_hash': 'a4fe18ae45381a33a8d3b1bfb8acb318310398ab0bdce595fb9278933a751546'}
+{'block_index': 97, 'transaction_timestamp': '2022-12-09 06:07:52.530873', 'transaction_data': '02/10/2018 08:52, 251', 'proof_of_work': 1429, 'previous_hash': 'f75a0223e031f1eb061e0ef44eb10f9cdc59feec0f3a3eb69c62837b231e7f98'}
+{'block_index': 98, 'transaction_timestamp': '2022-12-09 06:07:52.533838', 'transaction_data': '01/11/2016 09:33, 363', 'proof_of_work': 4853, 'previous_hash': '5ef62148f5ba9bfd733ed15d8bc84523ac52f6c7a454795c5e7fb4d6a1dde872'}
+{'block_index': 99, 'transaction_timestamp': '2022-12-09 06:07:52.544876', 'transaction_data': '15/12/2019 08:18, 315', 'proof_of_work': 581, 'previous_hash': '5d88f034fb45caa4af48cca2e4aed8e438eb7fd45b0302398dbe1a74d7446142'}
+{'block_index': 100, 'transaction_timestamp': '2022-12-09 06:07:52.545872', 'transaction_data': '04/06/2020 12:52, 167', 'proof_of_work': 1945, 'previous_hash': '15fdf722597fb9194a884bd06a3c2937e884ede120ecd6f0afd96e113ccec41c'}
+{'block_index': 101, 'transaction_timestamp': '2022-12-09 06:07:52.549839', 'transaction_data': '13/07/2020 09:50, 181', 'proof_of_work': 3945, 'previous_hash': '8e961680a9bd10a00b20e911452460ddf8ac3bab7448553e226f92243b91616a'}
+{'block_index': 102, 'transaction_timestamp': '2022-12-09 06:07:52.558871', 'transaction_data': '13/09/2018 08:33, 41', 'proof_of_work': 12742, 'previous_hash': '36e625da7a2abcbae03c5013735b43f5af13dbb5157540df20ceac614efcc6a2'}
+{'block_index': 103, 'transaction_timestamp': '2022-12-09 06:07:52.585873', 'transaction_data': '11/08/2018 12:46, 244', 'proof_of_work': 1977, 'previous_hash': '07e788fc00be9ab1871223abc11c2db407afa982da9b8c309564654ad6034eaa'}
+{'block_index': 104, 'transaction_timestamp': '2022-12-09 06:07:52.589862', 'transaction_data': '27/12/2017 08:07, 406', 'proof_of_work': 1622, 'previous_hash': '805c01edab5277c51b9844e082afc43871f886a6dc6bc17b04318a074be271a5'}
+{'block_index': 105, 'transaction_timestamp': '2022-12-09 06:07:52.592870', 'transaction_data': '19/10/2019 10:56, 297', 'proof_of_work': 2073, 'previous_hash': '42a4c6fbcf6e054271d7fb79c5de8ac563273716f4ea5394a7459253a7a987c7'}
+{'block_index': 106, 'transaction_timestamp': '2022-12-09 06:07:52.597851', 'transaction_data': '13/09/2017 15:16, 206', 'proof_of_work': 9276, 'previous_hash': '0fdedec4834c132896f553eafd5548adff2e9734f00dda0d544d9ad7bbedb3ae'}
+{'block_index': 107, 'transaction_timestamp': '2022-12-09 06:07:52.618837', 'transaction_data': '22/10/2016 11:01, 185', 'proof_of_work': 3571, 'previous_hash': '471f455468e2d27952bd4d82c3cd4a5531bd98a95f7cede7f329807349b5d3b3'}
+{'block_index': 108, 'transaction_timestamp': '2022-12-09 06:07:52.625839', 'transaction_data': '27/06/2018 05:38, 234', 'proof_of_work': 3528, 'previous_hash': '0bcd0f289c597572615326900ef95ab466ab0646cd6f683e6b54ba850dfb70ab'}
+{'block_index': 109, 'transaction_timestamp': '2022-12-09 06:07:52.634846', 'transaction_data': '20/07/2017 05:59, 392', 'proof_of_work': 10166, 'previous_hash': '6a89047762ca9205d497f80a54ea75da16bb4a7a2bc564135dc2adcac35a8329'}
+{'block_index': 110, 'transaction_timestamp': '2022-12-09 06:07:52.657871', 'transaction_data': '15/10/2018 17:13, 47', 'proof_of_work': 939, 'previous_hash': '40ece64ff77b5c11f487e7e0ec36da364b74021edf3995df27cc210413fb801c'}
+{'block_index': 111, 'transaction_timestamp': '2022-12-09 06:07:52.660839', 'transaction_data': '05/10/2019 04:13, 100', 'proof_of_work': 6776, 'previous_hash': '0fd6a3f8959add127a7ce80b443c4f7f13789c11fa5cd27f42ae21ffbb730f6c'}
+{'block_index': 112, 'transaction_timestamp': '2022-12-09 06:07:52.676880', 'transaction_data': '30/08/2017 18:38, 396', 'proof_of_work': 2912, 'previous_hash': 'ee4a1b1dd970ca400e8af98db7f5027f42907c5b1d820b6ced1e4b0b41d860e9'}
+{'block_index': 113, 'transaction_timestamp': '2022-12-09 06:07:52.683839', 'transaction_data': '11/06/2019 10:19, 72', 'proof_of_work': 649, 'previous_hash': '0d145a085afeb6596f9ec74a38ccc00299d43ac4230086cf1edb61ed24408861'}
+{'block_index': 114, 'transaction_timestamp': '2022-12-09 06:07:52.684871', 'transaction_data': '03/11/2017 08:58, 6', 'proof_of_work': 864, 'previous_hash': 'bf6e928c43bdc18c812348e0db9d6c6aed7ff80a35e702fb096423ba5db8175a'}
+{'block_index': 115, 'transaction_timestamp': '2022-12-09 06:07:52.686838', 'transaction_data': '30/03/2020 14:17, 331', 'proof_of_work': 1072, 'previous_hash': '304e983ff49a0f203f663b24c6ea96ff358fcf01fed7d4cfe896f50a6cb901c6'}
+{'block_index': 116, 'transaction_timestamp': '2022-12-09 06:07:52.689837', 'transaction_data': '21/08/2020 09:14, 368', 'proof_of_work': 5434, 'previous_hash': '7641098b69d634007a0146aa08d1d70715fdd09791989a8543ed1ecff634575d'}
+{'block_index': 117, 'transaction_timestamp': '2022-12-09 06:07:52.703839', 'transaction_data': '11/08/2020 09:37, 367', 'proof_of_work': 7440, 'previous_hash': '9b6cafcdb2825ce87f544c601c8187dceb6bcc04670e9f4dccf19759789c1ab0'}
+{'block_index': 118, 'transaction_timestamp': '2022-12-09 06:07:52.721839', 'transaction_data': '31/05/2019 16:36, 66', 'proof_of_work': 4924, 'previous_hash': '12ed57325bb6e821286af77edb808373a429b771d40d28265f9138b7b8706c2a'}
+{'block_index': 119, 'transaction_timestamp': '2022-12-09 06:07:52.734852', 'transaction_data': '30/07/2020 08:30, 364', 'proof_of_work': 3397, 'previous_hash': '6e398ffba02ccf2af15efad50b0bf48d2c96a080c84832602a35e9bf58a2364c'}
+{'block_index': 120, 'transaction_timestamp': '2022-12-09 06:07:52.742840', 'transaction_data': '26/02/2018 18:32, 216', 'proof_of_work': 10492, 'previous_hash': 'dfa29dd4e9cec876116658a8c55dbcf1a4a00d7632b9d27fca2a10acf57621ab'}
+{'block_index': 121, 'transaction_timestamp': '2022-12-09 06:07:52.771872', 'transaction_data': '02/01/2020 11:03, 125', 'proof_of_work': 4534, 'previous_hash': 'a506dd1adc9ab78aa25438fe694b2df12877b3a462f61ee4f65a9ef16e23748c'}
+]
+
+"""
+
